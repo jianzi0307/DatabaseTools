@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:WindowedApplication xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					   xmlns:s="library://ns.adobe.com/flex/spark" 
+					   xmlns:mx="library://ns.adobe.com/flex/mx"
+					   creationComplete="application_creationCompleteHandler(event)" 
+					   xmlns:components="com.ninem.components.*" 
+					   xmlns:enhancedpanel="com.ninem.components.enhancedpanel.*" 
+					   xmlns:enhancedtitlewindow="com.ninem.components.enhancedtitlewindow.*"
+					   width="600"
+					   height="400" 
+					   skinClass="view.skin.MySkin" xmlns:local="*" xmlns:view="view.*">
+	<fx:Style> 
+		@namespace s "library://ns.adobe.com/flex/spark"; 
+		@namespace mx "library//ns.adobe.com/flex/mx";
+		@namespace components "com.ninem.components.*";
+		@namespace enhancedtitlewindow "com.ninem.components.enhancedtitlewindow.*";
+		s|WindowedApplication 
+		{ 
+			skinClass:ClassReference("spark.skins.spark.SparkChromeWindowedApplicationSkin"); 
+			background-color:#999999; 
+			background-alpha:"1";
+		}
+		enhancedtitlewindow|EnhancedTitleWindow{
+			skin-class:ClassReference("com.ninem.skins.EnhancedTitleWindowSkin");
+			show-expand-indicator:true;
+		}
+		global
+		{
+			font-size: 12;
+			font-family: Arial;
+		}
+	</fx:Style>
+	
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import com.maclema.mysql.Connection;
+			import com.maclema.mysql.MySqlToken;
+			import com.maclema.mysql.ResultSet;
+			import com.maclema.mysql.Statement;
+			
+			import data.DatabaseConf;
+			
+			import mx.controls.Alert;
+			import mx.events.FlexEvent;
+			import mx.events.MenuEvent;
+			import mx.rpc.AsyncResponder;
+
+			private var con:Connection;
+
+			protected function application_creationCompleteHandler(event:FlexEvent):void
+			{
+//				con = new Connection("127.0.0.1", 3306, "root", "111111","test" );
+//				con.addEventListener(Event.CONNECT, handleConnected);
+//				con.connect();
+			}
+			
+			protected function handleConnected(event:Event):void
+			{
+				var st:Statement = con.createStatement();
+				
+				var token:MySqlToken = st.executeQuery("SELECT * FROM abc");
+				
+				token.addResponder(new AsyncResponder(
+					function(data:Object, token:Object):void {
+						var rs:ResultSet = ResultSet(data);
+						Alert.show("Found " + rs.size() + " employees!");
+					},
+					
+					function(info:Object, token:Object):void {
+						Alert.show("Error: " + info);
+					},
+					
+					token
+				));
+			}
+		]]>
+	</fx:Script>
+	<s:Group id="menuBarGroup" y="0" top="0" left="0" right="0">
+		<mx:TabNavigator borderStyle="solid">
+			<view:ToolsPanel label="工具" width="{this.width}" height="{this.height}" />
+			<view:SettingPanel label="配置" width="{this.width}" height="{this.height}" paddingLeft="20" />
+		</mx:TabNavigator>
+	</s:Group>
+</s:WindowedApplication>

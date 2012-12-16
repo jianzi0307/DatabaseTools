@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:VBox xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" creationComplete="toolsPanel_creationCompleteHandler(event)">
+	
+	<fx:Script>
+		<![CDATA[
+			import data.DatabaseConf;
+			
+			import manager.DBManager;
+			
+			import mx.controls.Alert;
+			import mx.events.FlexEvent;
+			
+			import utils.FuncUtils;
+			protected function connectBtn_clickHandler(event:MouseEvent):void
+			{
+				if(DBManager.instance.isConnected() )
+				{
+					DBManager.instance.disconnect();
+					checkBtnStatus();
+				}
+				else
+				{
+					var databaseConf:DatabaseConf = FuncUtils.readConfig( Config.CONFIG_FILE );
+					if( databaseConf )
+					{
+						DBManager.instance.connect( 
+							databaseConf.host,
+							databaseConf.port,
+							databaseConf.user,
+							databaseConf.password,
+							databaseConf.database,
+							completeConnectHandler,
+							sqlErrorHandler,
+							ioErrorHandler,
+							closeHandler
+						);
+					}
+					else
+					{
+						Alert.show("检查数据库配置参数","提示");
+					}
+				}
+			}
+			
+			protected function toolsPanel_creationCompleteHandler(event:FlexEvent):void
+			{
+				checkBtnStatus();
+			}
+			
+			private function closeHandler( evt:Event ):void
+			{
+				Alert.show( "已关闭!" ,"提示");
+			}
+			
+			private function completeConnectHandler( evt:Event ):void
+			{
+				//链接成功
+				this.connectBtn.label = '断开连接';
+			}
+			
+			private function ioErrorHandler( evt:IOErrorEvent ):void
+			{
+				Alert.show( " IO错误!" ,"提示");
+			}
+			
+			private function sqlErrorHandler( evt:SQLErrorEvent ):void
+			{
+				Alert.show("SQL执行错误","提示");
+			}
+			
+			private function checkBtnStatus():void
+			{
+				if( DBManager.instance.isConnected() )
+					this.connectBtn.label = '断开连接';
+				else
+					this.connectBtn.label = '连接服务器';
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	<s:Button label="连接服务器" id="connectBtn" click="connectBtn_clickHandler(event)"/>
+</mx:VBox>

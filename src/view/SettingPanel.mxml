@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:VBox xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" creationComplete="settingPanel_creationCompleteHandler(event)" >
+	<fx:Script>
+		<![CDATA[
+			import data.DatabaseConf;
+			
+			import mx.controls.Alert;
+			import mx.events.FlexEvent;
+			
+			import utils.FuncUtils;
+			import utils.StringUtil;
+			
+			protected function settingPanel_creationCompleteHandler(event:FlexEvent):void
+			{
+				//从配置文件载入
+				var config:DatabaseConf = FuncUtils.readConfig( Config.CONFIG_FILE );
+				if( config )
+				{
+					this.host.text = config.host;
+					this.port.text = config.port.toString();
+					this.user.text = config.user;
+					this.password.text = config.password.toString();
+					this.database.text = config.database;
+				}
+			}
+			
+			protected function settingBtn_clickHandler(event:MouseEvent):void
+			{
+				//保存配置
+				var xml:String = "<root>" +
+								  "<!-- 数据库配置 -->" +
+								  "	<host>{0}</host>" +
+								  " <port>{1}</port>" +
+								  "	<user>{2}</user>" +
+								  "	<password>{3}</password>" +
+								  "	<database>{4}</database>" +
+								  "</root>";
+				
+				//TODO: 验证用户输入
+				
+				var xmlFile:XML = XML( StringUtil.format( xml,this.host.text,this.port.text,this.user.text,this.password.text,this.database.text ) );
+				FuncUtils.writeFile( Config.CONFIG_FILE,xmlFile );
+				
+				Alert.show("配置已保存!","提示");
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	
+	<mx:Label text="Host:"/>
+	<mx:TextInput id="host" tabIndex="1"/>
+	<mx:Label text="Port:" />
+	<mx:TextInput id="port" tabIndex="2"/>
+	<mx:Label text="User:" />
+	<mx:TextInput id="user" tabIndex="3"/>
+	<mx:Label text="Password:" />
+	<mx:TextInput id="password" tabIndex="4"/>
+	<mx:Label text="Database:"/>
+	<mx:TextInput id="database" tabIndex="5"/>
+	<s:Button label="保存配置" tabIndex="6" click="settingBtn_clickHandler(event)" />
+</mx:VBox>
